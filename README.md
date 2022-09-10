@@ -9,4 +9,4 @@ Laravel Many To Many relationship between categories and products table
    
   1.3 Pivot table fields: by default, there should be only two fields – the foreign key to each table, in our case category_id and product_id. You can insert more fields if you need, then you need to add them to the relationship assignment.
   
-    following link:  https://appdividend.com/2022/01/21/laravel-many-to-many-relationship/
+    https://appdividend.com/2022/01/21/laravel-many-to-many-relationship/
