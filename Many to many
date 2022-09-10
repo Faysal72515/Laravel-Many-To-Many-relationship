@@ -1,0 +1,250 @@
+// Product submission blade file [addProduct.blade.php]
+
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Product Submission Form</h2>
+
+<form action="{{ route('product.insert') }}" method="POST">
+    @csrf
+  <label for="name">Product Name:</label><br>
+  <input type="text" name="name" placeholder="Enter Product Name"><br>
+  <label for="name">Price:</label><br>
+  <input type="text" name="price" placeholder="price"><br><br>
+
+
+  <input type="checkbox" name="category1" value="1">
+  <label> Electronics</label><br>
+
+  <input type="checkbox" name="category2" value="2">
+  <label> Mobies</label><br>
+
+  <input type="checkbox" name="category3" value="3">
+  <label> Games</label><br><br>
+  <input type="submit" value="Submit">
+</form>
+
+</body>
+</html>
+
+
+
+---------------------------------------------------------------------------------------
+
+
+//Create following two route in web.php
+
+Route::view('/products', 'addProducts');
+Route::post('/add_product', 'App\Http\Controllers\ClientController@insert_productTo_database')->name('product.insert');
+
+
+
+---------------------------------------------------------------------------------------
+
+// now create migration [database table] file 
+
+1. categories migration: 
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreateCategoriesTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('categories', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('title');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('categories');
+    }
+}
+
+
+2. products migrations:
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreateProductsTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('products', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->float('price');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('products');
+    }
+}
+
+
+3. Now create pivote table called category_product [its always follows alfabetical order (between) and would be singular format]
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreateCategoryProductTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('category_product', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('category_id')->unsigned();
+            $table->integer('product_id')->unsigned();
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('category_product');
+    }
+}
+
+----------------------------------------------------------------------------------
+
+
+// now create models   [always start with capital alphabet and should be Singular format followed by migration file [database table]]
+
+1. Category.php
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Category extends Model
+{
+    use HasFactory;
+    public function products()
+    {
+        return $this->belongsToMany(Product::class);
+    }
+}
+
+
+
+2. Product.php 
+
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Product extends Model
+{
+    use HasFactory;
+
+    protected $fillable=[
+        'name',
+        'price',
+
+    ];
+
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class);
+    }
+}
+
+
+---------------------------------------------------------------------------
+
+
+** Now the following code add into the Controller file    [in this work its ClientController]  
+
+1. handled by the form [blade file]
+    public function insert_productTo_database(Request $request){
+        $product = new Product();
+        $product->name = $request->has('name')?  $request->get('name'):'';
+        $product->price = $request->has('price')?  $request->get('price'):'';
+        $product->save();
+
+        $x = $request->get('category1');
+        $y = $request->get('category2');
+        $z = $request->get('category3');
+
+
+        $category = Category::find([$x, $y, $z]) ;
+         $product->categories()->attach($category);
+
+         return redirect('/products');
+
+     }
+
+
+
+2. Direct [without any form]
+
+     public function insert_product(Request $request)
+     {
+         $product = new Product();
+         $product->name = 'God of War';
+         $product->price = 40;
+
+         $product->save();
+
+         $category = Category::find([1, 3]);
+         $product->categories()->attach($category);
+
+         return 'Success';
+     }
+
+
