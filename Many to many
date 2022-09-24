@@ -117,7 +117,7 @@ class CreateProductsTable extends Migration
 }
 
 
-3. Now create pivote table called category_product [its always follows alfabetical order (between) and would be singular format]
+3. Now create pivote table called category_product [its always follows alphabetical order (between) and would be singular format]
 
 <?php
 
@@ -208,7 +208,7 @@ class Product extends Model
 ---------------------------------------------------------------------------
 
 
-** Now the following code add into the Controller file    [in this work its ClientController]  
+** Now the following code add into the Controller file    [in this work, its ClientController]  
 
 1. handled by the form [blade file]
     public function insert_productTo_database(Request $request){
